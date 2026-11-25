@@ -58,10 +58,23 @@ input[type=range]{width:100%;accent-color:#a66bff}
 </section>
 
 <section class="panel">
-<h2>04 — Appliquer comme fond d’écran</h2>
-<button id="wallpaper" class="secondary" disabled>Appliquer comme fond d’écran</button>
-<p id="wallpaperStatus">Après l'export, ce bouton t'aidera à enregistrer la vidéo et à suivre les étapes sur iPhone.</p>
-<p class="small">Important : Safari ne peut pas installer directement une vidéo ou convertir un MP4 en Live Photo. iOS doit effectuer cette opération avec un outil compatible Live Photo.</p>
+<h2>04 — Convertir en Live Photo</h2>
+<p>Après avoir exporté ton extrait, enregistre le MP4 dans Photos depuis le menu de partage de Safari, puis ouvre MakeLive pour le convertir en vraie Live Photo.</p>
+<a class="pick" href="https://apps.apple.com/us/app/makelive-live-photo-converter/id6761287865" target="_blank" rel="noopener">＋ Ouvrir MakeLive sur l’App Store</a>
+<ol style="color:#ddd;line-height:1.6;padding-left:22px">
+<li>Dans Safari, télécharge le MP4.</li>
+<li>Ouvre le fichier téléchargé, touche Partager, puis choisis « Enregistrer la vidéo » si cette option apparaît.</li>
+<li>Ouvre MakeLive et importe la vidéo depuis Photos.</li>
+<li>Choisis le mode « Live Wallpaper » si disponible, règle l’extrait et enregistre la Live Photo.</li>
+<li>Ouvre Photos et vérifie que la Live Photo s’anime quand tu la maintiens appuyée.</li>
+</ol>
+<p id="wallpaperStatus" class="small">La disponibilité du mode Live Wallpaper et certaines options peuvent dépendre de la version de l’application et d’un achat intégré.</p>
+</section>
+
+<section class="panel">
+<h2>05 — Appliquer comme fond d’écran</h2>
+<button id="wallpaper" class="secondary" disabled>Voir les étapes pour l’écran verrouillé</button>
+<p class="small">Après avoir enregistré et vérifié la Live Photo dans Photos, ouvre Réglages &gt; Fond d’écran &gt; Ajouter un fond d’écran, puis sélectionne la Live Photo si iOS la propose. Safari ne peut pas appliquer le fond d’écran automatiquement.</p>
 </section>
 
 <script>
@@ -205,9 +218,8 @@ exportButton.addEventListener('click',async()=>{
   }
 });
 wallpaperButton.addEventListener('click',()=>{
-  if(!exportedBlob){wallpaperStatus.textContent='Exporte d’abord ton extrait MP4.';return;}
-  wallpaperStatus.textContent='1. Télécharge le MP4 avec le lien « Télécharger VideoLock-extrait.mp4 ».\n2. Ouvre Fichiers puis enregistre la vidéo dans Photos si iOS le propose.\n3. Pour un fond animé, il faut convertir le MP4 en vraie Live Photo avec une application compatible, puis choisir cette Live Photo dans Réglages > Fond d’écran. Ce bouton ne peut pas effectuer l’installation lui-même.';
-  document.getElementById('download').scrollIntoView({behavior:'smooth',block:'center'});
+  wallpaperStatus.textContent='Dans Photos, ouvre la Live Photo et vérifie qu’elle s’anime en maintenant le doigt dessus. Ensuite, va dans Réglages > Fond d’écran > Ajouter un fond d’écran et choisis la Live Photo si iOS la propose. Le site ne peut pas appliquer le fond d’écran automatiquement.';
+});
 });
 </script>
 </body>
