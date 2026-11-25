@@ -1,28 +1,34 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#090611">
 <title>VideoLock</title>
 <style>
+:root{--bg:#090611;--panel:#191126;--line:#49306d;--purple:#884be8;--light:#d8baff;--muted:#b9adca}
 *{box-sizing:border-box}
-body{margin:0;padding:22px;background:#090611;color:#fff;font-family:Arial,sans-serif}
-header{text-align:center;padding:18px 8px}
-h1{font-size:34px;letter-spacing:5px;color:#b58aff;margin:8px 0}
-p{color:#aaa;line-height:1.45}
-.panel{background:#191126;border:1px solid #48306d;border-radius:20px;padding:20px;margin:20px 0}
-h2{font-size:23px;margin:4px 0 20px}
-button,.pick{display:block;width:100%;padding:16px;background:#884bee;color:white;border:0;border-radius:13px;text-align:center;font-size:17px;font-weight:bold;margin:14px 0}
-button:disabled{opacity:.45}
-input[type=file]{display:none}
-video{width:100%;margin-top:15px;border-radius:14px;background:#000;max-height:65vh}
-label{display:block;margin-top:20px;color:#d5baff}
-input[type=range]{width:100%;accent-color:#a66bff}
-.value{color:#d5baff}
-#status{white-space:pre-wrap}
-.secondary{background:#33234b}
-.small{font-size:13px;color:#aaa}
+body{margin:0;padding:20px 16px 40px;background:var(--bg);color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+header{text-align:center;padding:14px 0 22px}
+h1{font-size:32px;letter-spacing:3px;color:#b58aff;margin:6px 0}
+header p{color:#ddd;margin:8px 0}
+main{max-width:680px;margin:auto}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:20px;margin:16px 0;box-shadow:0 8px 28px #0004}
+h2{font-size:21px;margin:0 0 16px}
+p{line-height:1.5;color:#ddd}
+button,.pick{display:block;width:100%;padding:16px;margin:12px 0;background:var(--purple);color:white;border:0;border-radius:13px;font-size:16px;font-weight:700;text-align:center;cursor:pointer}
+button.secondary{background:#332544;border:1px solid #68489a}
+button:disabled{opacity:.45;cursor:not-allowed}
+input[type=file]{position:absolute;left:-10000px}
+video{display:block;width:100%;max-height:58vh;background:#000;border-radius:14px;margin-top:14px}
+label.range-label{display:block;color:var(--light);margin:18px 0 8px}
+input[type=range]{width:100%;accent-color:#b58aff}
+.value{color:#fff;font-variant-numeric:tabular-nums}
+.status{white-space:pre-wrap;background:#100b19;border-radius:12px;padding:12px;color:#e5d8f5;min-height:46px}
+a.download{display:block;padding:14px;background:#176b45;color:#fff;text-decoration:none;text-align:center;border-radius:12px;font-weight:700;margin-top:12px}
+.note{font-size:13px;color:var(--muted)}
+ol{padding-left:22px;line-height:1.7;color:#eee}
+.hidden{display:none!important}
 </style>
 </head>
 <body>
@@ -30,196 +36,244 @@ input[type=range]{width:100%;accent-color:#a66bff}
 <h1>VIDEOLOCK</h1>
 <p>Transforme tes vidéos en souvenirs</p>
 </header>
-
+<main>
 <section class="panel">
 <h2>01 — Importer une vidéo</h2>
 <label class="pick" for="videoFile">＋ Choisir une vidéo</label>
 <input id="videoFile" type="file" accept="video/*">
-<video id="preview" controls playsinline></video>
-<p id="info">Aucune vidéo sélectionnée.</p>
+<video id="preview" controls playsinline webkit-playsinline class="hidden"></video>
+<p id="fileInfo" class="note">Aucune vidéo sélectionnée.</p>
 </section>
 
 <section class="panel">
-<h2>02 — Découper</h2>
-<label>Début : <span class="value" id="startValue">0</span> s</label>
-<input id="start" type="range" min="0" max="100" value="0" step="0.1">
-<label>Fin : <span class="value" id="endValue">0</span> s</label>
-<input id="end" type="range" min="0" max="100" value="100" step="0.1">
-<button id="prepare" disabled>Préparer mon extrait</button>
-<p id="status">Sélectionne une vidéo pour commencer.</p>
+<h2>02 — Découper ton extrait</h2>
+<label class="range-label" for="start">Début : <span class="value" id="startValue">0,0</span> s</label>
+<input id="start" type="range" min="0" max="1" step="0.1" value="0" disabled>
+<label class="range-label" for="end">Fin : <span class="value" id="endValue">0,0</span> s</label>
+<input id="end" type="range" min="0" max="1" step="0.1" value="1" disabled>
+<button id="previewClip" disabled>Lire l'extrait sélectionné</button>
+<p id="trimStatus" class="status">Importe une vidéo pour commencer.</p>
 </section>
 
 <section class="panel">
-<h2>03 — Exporter</h2>
-<p>L'extrait sera exporté en MP4 silencieux, optimisé pour un fond d'écran. Le son de la vidéo ne sera pas inclus.</p>
+<h2>03 — Exporter l'extrait MP4</h2>
+<p>VideoLock tente de créer un nouveau fichier vidéo correspondant à la portion sélectionnée. Garde Safari ouvert pendant l'export.</p>
 <button id="export" disabled>Exporter mon extrait MP4</button>
-<a id="download" hidden></a>
-<p id="exportStatus" class="small">Aucun extrait exporté.</p>
+<p id="exportStatus" class="status">Aucun extrait exporté.</p>
+<a id="download" class="download hidden" download="VideoLock-extrait.mp4">Télécharger l'extrait</a>
+<p class="note">Selon le format de la vidéo et les fonctions prises en charge par Safari, l'export peut ne pas être disponible. Le fichier exporté n'est pas une Live Photo.</p>
 </section>
 
 <section class="panel">
 <h2>04 — Convertir en Live Photo</h2>
-<p>Après avoir exporté ton extrait, enregistre le MP4 dans Photos depuis le menu de partage de Safari, puis ouvre MakeLive pour le convertir en vraie Live Photo.</p>
-<a class="pick" href="https://apps.apple.com/us/app/makelive-live-photo-converter/id6761287865" target="_blank" rel="noopener">＋ Ouvrir MakeLive sur l’App Store</a>
-<ol style="color:#ddd;line-height:1.6;padding-left:22px">
-<li>Dans Safari, télécharge le MP4.</li>
-<li>Ouvre le fichier téléchargé, touche Partager, puis choisis « Enregistrer la vidéo » si cette option apparaît.</li>
-<li>Ouvre MakeLive et importe la vidéo depuis Photos.</li>
-<li>Choisis le mode « Live Wallpaper » si disponible, règle l’extrait et enregistre la Live Photo.</li>
-<li>Ouvre Photos et vérifie que la Live Photo s’anime quand tu la maintiens appuyée.</li>
+<p>Une page web ne peut pas fabriquer à elle seule une vraie Live Photo compatible avec Photos. Après avoir téléchargé le MP4, utilise une application iPhone qui crée une Live Photo à partir d'une vidéo.</p>
+<a class="pick" href="https://apps.apple.com/us/app/makelive-live-photo-converter/id6761287865" target="_blank" rel="noopener">Ouvrir MakeLive sur l’App Store</a>
+<ol>
+<li>Télécharge d'abord ton extrait MP4 dans Fichiers ou Photos.</li>
+<li>Ouvre MakeLive et importe la vidéo.</li>
+<li>Choisis la portion souhaitée et crée/enregistre la Live Photo.</li>
+<li>Ouvre Photos et vérifie que l'élément porte bien la mention « LIVE ».</li>
 </ol>
-<p id="wallpaperStatus" class="small">La disponibilité du mode Live Wallpaper et certaines options peuvent dépendre de la version de l’application et d’un achat intégré.</p>
+<p class="note">Vérifie la disponibilité de MakeLive dans ton App Store et les options proposées par sa version actuelle.</p>
 </section>
 
 <section class="panel">
-<h2>05 — Appliquer comme fond d’écran</h2>
-<button id="wallpaper" class="secondary" disabled>Afficher les étapes pour le fond d’écran</button>
-<p class="small">Après avoir enregistré et vérifié la Live Photo dans Photos, ouvre Réglages &gt; Fond d’écran &gt; Ajouter un fond d’écran, puis sélectionne la Live Photo si iOS la propose. Safari ne peut pas appliquer le fond d’écran automatiquement.</p>
+<h2>05 — Utiliser comme fond d’écran</h2>
+<p>VideoLock ne peut pas appliquer directement un fond d’écran depuis Safari. Si la Live Photo est bien créée et enregistrée :</p>
+<ol>
+<li>Ouvre l'app Photos sur ton iPhone.</li>
+<li>Ouvre la Live Photo, puis touche Partager ou le menu d'options.</li>
+<li>Choisis « Utiliser comme fond d’écran » si iOS propose cette option, puis suis les étapes affichées.</li>
+</ol>
+<p class="note">Les versions récentes d’iOS peuvent limiter ou modifier les options de fond d’écran Live. La lecture animée n'est pas une vidéo en boucle permanente sur l'écran verrouillé.</p>
 </section>
+</main>
 
 <script>
-const fileInput=document.getElementById('videoFile');
-const video=document.getElementById('preview');
-const start=document.getElementById('start');
-const end=document.getElementById('end');
-const startValue=document.getElementById('startValue');
-const endValue=document.getElementById('endValue');
-const status=document.getElementById('status');
-const exportButton=document.getElementById('export');
-const exportStatus=document.getElementById('exportStatus');
-const wallpaperButton=document.getElementById('wallpaper');
-const wallpaperStatus=document.getElementById('wallpaperStatus');
-let videoURL=null, exportedURL=null, exportedBlob=null, duration=0;
+(() => {
+"use strict";
+const fileInput = document.getElementById("videoFile");
+const video = document.getElementById("preview");
+const fileInfo = document.getElementById("fileInfo");
+const start = document.getElementById("start");
+const end = document.getElementById("end");
+const startValue = document.getElementById("startValue");
+const endValue = document.getElementById("endValue");
+const previewClip = document.getElementById("previewClip");
+const trimStatus = document.getElementById("trimStatus");
+const exportButton = document.getElementById("export");
+const exportStatus = document.getElementById("exportStatus");
+const download = document.getElementById("download");
+let sourceURL = null;
+let resultURL = null;
+let duration = 0;
+let exporting = false;
 
-fileInput.addEventListener('change',()=>{
-  const file=fileInput.files && fileInput.files[0];
-  if(!file)return;
-  if(videoURL)URL.revokeObjectURL(videoURL);
-  if(exportedURL)URL.revokeObjectURL(exportedURL);
-  exportedURL=null;exportedBlob=null;
-  exportButton.disabled=true;wallpaperButton.disabled=true;
-  exportStatus.textContent='Aucun extrait exporté.';
-  wallpaperStatus.textContent='Après l’export, tu pourras préparer le fichier.';
-  videoURL=URL.createObjectURL(file);
-  video.src=videoURL;
-  document.getElementById('info').textContent=file.name;
-  status.textContent='Vidéo importée. Prépare ton extrait.';
-});
-
-video.addEventListener('loadedmetadata',()=>{
-  duration=video.duration;
-  if(!Number.isFinite(duration)||duration<=0){status.textContent='Durée vidéo non reconnue.';return;}
-  start.max=duration;end.max=duration;
-  start.value=0;end.value=duration;
-  updateValues();
-  document.getElementById('info').textContent+=' — '+duration.toFixed(1)+' secondes';
-  document.getElementById('prepare').disabled=false;
-});
-function updateValues(){
-  startValue.textContent=Number(start.value).toFixed(1);
-  endValue.textContent=Number(end.value).toFixed(1);
+const fmt = n => Number(n).toFixed(1).replace(".", ",");
+function updateLabels() {
+  startValue.textContent = fmt(start.value);
+  endValue.textContent = fmt(end.value);
 }
-start.addEventListener('input',()=>{
-  if(Number(start.value)>=Number(end.value))start.value=Math.max(0,Number(end.value)-0.1);
-  updateValues();
-});
-end.addEventListener('input',()=>{
-  if(Number(end.value)<=Number(start.value))end.value=Math.min(duration,Number(start.value)+0.1);
-  updateValues();
-});
-document.getElementById('prepare').addEventListener('click',()=>{
-  if(!video.src)return;
-  status.textContent='Extrait sélectionné : '+Number(start.value).toFixed(1)+' à '+Number(end.value).toFixed(1)+' secondes. Durée : '+(Number(end.value)-Number(start.value)).toFixed(1)+' s.';
-  exportButton.disabled=false;
-});
-
-function waitEvent(target,event){
-  return new Promise((resolve,reject)=>{
-    const onOk=()=>{cleanup();resolve();};
-    const onErr=()=>{cleanup();reject(new Error('Impossible de lire la vidéo.'));};
-    const cleanup=()=>{target.removeEventListener(event,onOk);target.removeEventListener('error',onErr);};
-    target.addEventListener(event,onOk,{once:true});
-    target.addEventListener('error',onErr,{once:true});
-  });
+function updateTrimStatus() {
+  const a = Number(start.value), b = Number(end.value);
+  trimStatus.textContent = `Extrait sélectionné : ${fmt(a)} à ${fmt(b)} secondes (${fmt(Math.max(0,b-a))} s).`;
 }
-function seekTo(time){
-  return new Promise((resolve,reject)=>{
-    if(Math.abs(video.currentTime-time)<0.04){resolve();return;}
-    const done=()=>{video.removeEventListener('seeked',done);resolve();};
-    video.addEventListener('seeked',done,{once:true});
-    video.currentTime=time;
-    setTimeout(()=>{video.removeEventListener('seeked',done);reject(new Error('La recherche dans la vidéo a échoué.'));},10000);
-  });
-}
-exportButton.addEventListener('click',async()=>{
-  const from=Number(start.value),to=Number(end.value);
-  if(!video.src||to<=from){status.textContent='Choisis une plage vidéo valide.';return;}
-  if(!window.MediaRecorder || !HTMLCanvasElement.prototype.captureStream){
-    exportStatus.textContent='Cette version de Safari ne permet pas cet export. Essaie une version récente d’iOS ou un navigateur compatible.';
+fileInput.addEventListener("change", () => {
+  const file = fileInput.files && fileInput.files[0];
+  if (!file) return;
+  if (!file.type.startsWith("video/")) {
+    fileInfo.textContent = "Choisis un fichier vidéo.";
     return;
   }
-  exportButton.disabled=true;wallpaperButton.disabled=true;
-  exportStatus.textContent='Préparation de l’export… Garde Safari ouvert.';
-  let canvasStream=null,recorder=null,raf=0;
-  try{
-    const width=video.videoWidth,height=video.videoHeight;
-    if(!width||!height)throw new Error('Dimensions vidéo indisponibles.');
-    const scale=Math.min(1,1080/Math.max(width,height));
-    const canvas=document.createElement('canvas');
-    canvas.width=Math.max(2,Math.round(width*scale/2)*2);
-    canvas.height=Math.max(2,Math.round(height*scale/2)*2);
-    const ctx=canvas.getContext('2d');
-    canvasStream=canvas.captureStream(30);
-    const mime=MediaRecorder.isTypeSupported('video/mp4;codecs=avc1')
-      ?'video/mp4;codecs=avc1'
-      :(MediaRecorder.isTypeSupported('video/mp4')?'video/mp4':'');
-    recorder=mime?new MediaRecorder(canvasStream,{mimeType:mime}):new MediaRecorder(canvasStream);
-    const chunks=[];
-    recorder.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data);};
-    const stopped=new Promise((resolve,reject)=>{
-      recorder.onstop=resolve;
-      recorder.onerror=()=>reject(new Error('Erreur pendant l’encodage.'));
+  if (sourceURL) URL.revokeObjectURL(sourceURL);
+  if (resultURL) URL.revokeObjectURL(resultURL);
+  resultURL = null;
+  download.classList.add("hidden");
+  download.removeAttribute("href");
+  sourceURL = URL.createObjectURL(file);
+  video.src = sourceURL;
+  video.classList.remove("hidden");
+  fileInfo.textContent = `${file.name} — ${(file.size/1024/1024).toFixed(1)} Mo`;
+  exportButton.disabled = true;
+  previewClip.disabled = true;
+  trimStatus.textContent = "Chargement de la vidéo…";
+  exportStatus.textContent = "Aucun extrait exporté.";
+});
+video.addEventListener("loadedmetadata", () => {
+  duration = video.duration;
+  if (!Number.isFinite(duration) || duration <= 0) {
+    trimStatus.textContent = "Impossible de lire la durée de cette vidéo.";
+    return;
+  }
+  start.min = "0"; start.max = String(duration); start.step = "0.1"; start.value = "0";
+  end.min = "0"; end.max = String(duration); end.step = "0.1"; end.value = String(duration);
+  start.disabled = false; end.disabled = false;
+  previewClip.disabled = false; exportButton.disabled = false;
+  updateLabels(); updateTrimStatus();
+});
+start.addEventListener("input", () => {
+  if (Number(start.value) >= Number(end.value)) start.value = String(Math.max(0, Number(end.value)-0.1));
+  updateLabels(); updateTrimStatus();
+});
+end.addEventListener("input", () => {
+  if (Number(end.value) <= Number(start.value)) end.value = String(Math.min(duration, Number(start.value)+0.1));
+  updateLabels(); updateTrimStatus();
+});
+previewClip.addEventListener("click", async () => {
+  if (!video.src) return;
+  try {
+    video.currentTime = Number(start.value);
+    await video.play();
+    trimStatus.textContent = "Lecture de l'extrait… La lecture s'arrêtera à la fin sélectionnée.";
+    const stopAtEnd = () => {
+      if (video.currentTime >= Number(end.value)) {
+        video.pause();
+        video.removeEventListener("timeupdate", stopAtEnd);
+        updateTrimStatus();
+      }
+    };
+    video.addEventListener("timeupdate", stopAtEnd);
+  } catch (e) {
+    trimStatus.textContent = "Safari n'a pas pu démarrer la lecture. Touche Lecture sur la vidéo.";
+  }
+});
+
+exportButton.addEventListener("click", async () => {
+  if (!video.src || exporting) return;
+  const from = Number(start.value), to = Number(end.value);
+  if (to <= from || to-from < 0.2) {
+    exportStatus.textContent = "Choisis un extrait d'au moins 0,2 seconde.";
+    return;
+  }
+  const canCapture = HTMLCanvasElement.prototype.captureStream;
+  if (!canCapture || !window.MediaRecorder) {
+    exportStatus.textContent = "L'export vidéo par Safari n'est pas pris en charge sur cette configuration. Essaie une version récente de Safari ou un autre navigateur compatible.";
+    return;
+  }
+  exporting = true;
+  exportButton.disabled = true;
+  download.classList.add("hidden");
+  exportStatus.textContent = "Préparation de l'export… Garde Safari ouvert.";
+  let canvasStream = null, recorder = null, raf = 0, audioStream = null;
+  try {
+    const width = video.videoWidth, height = video.videoHeight;
+    if (!width || !height) throw new Error("Dimensions vidéo indisponibles.");
+    const scale = Math.min(1, 1080 / Math.max(width, height));
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(2, Math.round(width*scale/2)*2);
+    canvas.height = Math.max(2, Math.round(height*scale/2)*2);
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("Impossible de préparer l'image vidéo.");
+    canvasStream = canvas.captureStream(25);
+    let tracks = [...canvasStream.getVideoTracks()];
+    if (typeof video.captureStream === "function") {
+      audioStream = video.captureStream();
+      tracks = tracks.concat(audioStream.getAudioTracks());
+    }
+    const combined = new MediaStream(tracks);
+    const mimeCandidates = ["video/mp4;codecs=h264,aac","video/mp4","video/webm;codecs=vp9,opus","video/webm"];
+    const mimeType = mimeCandidates.find(t => MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t));
+    if (!mimeType) throw new Error("Safari ne propose aucun format d'export compatible.");
+    recorder = new MediaRecorder(combined, {mimeType});
+    const chunks = [];
+    recorder.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
+    const stopped = new Promise((resolve, reject) => {
+      recorder.onstop = resolve;
+      recorder.onerror = () => reject(new Error("Erreur pendant l'encodage."));
+    });
+    const seekTo = time => new Promise((resolve, reject) => {
+      if (Math.abs(video.currentTime-time) < 0.04) { resolve(); return; }
+      const done = () => { cleanup(); resolve(); };
+      const fail = () => { cleanup(); reject(new Error("La recherche dans la vidéo a échoué.")); };
+      const cleanup = () => {
+        video.removeEventListener("seeked", done);
+        video.removeEventListener("error", fail);
+      };
+      video.addEventListener("seeked", done, {once:true});
+      video.addEventListener("error", fail, {once:true});
+      video.currentTime = time;
     });
     await seekTo(from);
-    video.muted=true;
-    const draw=()=>{
-      if(video.readyState>=2)ctx.drawImage(video,0,0,canvas.width,canvas.height);
-      if(video.currentTime>=to || video.ended){
-        if(recorder.state!=='inactive')recorder.stop();
+    video.pause();
+    const draw = () => {
+      if (video.readyState >= 2) ctx.drawImage(video,0,0,canvas.width,canvas.height);
+      if (video.currentTime >= to || video.ended) {
+        if (recorder.state !== "inactive") recorder.stop();
         return;
       }
-      raf=requestAnimationFrame(draw);
+      raf = requestAnimationFrame(draw);
     };
-    ctx.drawImage(video,0,0,canvas.width,canvas.height);
     recorder.start(250);
     await video.play();
     draw();
-    exportStatus.textContent='Export en cours… '+(to-from).toFixed(1)+' secondes.';
+    exportStatus.textContent = "Export en cours…";
     await stopped;
     cancelAnimationFrame(raf);
     video.pause();
-    const type=recorder.mimeType||'video/mp4';
-    exportedBlob=new Blob(chunks,{type});
-    if(!exportedBlob.size)throw new Error('Le fichier exporté est vide.');
-    if(exportedURL)URL.revokeObjectURL(exportedURL);
-    exportedURL=URL.createObjectURL(exportedBlob);
-    const a=document.getElementById('download');
-    a.href=exportedURL;a.download='VideoLock-extrait.mp4';a.textContent='Télécharger VideoLock-extrait.mp4';a.hidden=false;
-    a.style='display:block;color:#d5baff;text-align:center;margin:14px 0;font-weight:bold';
-    exportStatus.textContent='Export terminé. Appuie sur le lien ci-dessus pour enregistrer le MP4 dans Fichiers.';
-    wallpaperButton.disabled=false;
-  }catch(err){
-    if(recorder&&recorder.state!=='inactive')recorder.stop();
+    const blob = new Blob(chunks, {type: recorder.mimeType || mimeType});
+    if (!blob.size) throw new Error("Le fichier exporté est vide.");
+    if (resultURL) URL.revokeObjectURL(resultURL);
+    resultURL = URL.createObjectURL(blob);
+    download.href = resultURL;
+    const ext = blob.type.includes("mp4") ? "mp4" : "webm";
+    download.download = `VideoLock-extrait.${ext}`;
+    download.textContent = `Télécharger l'extrait ${ext.toUpperCase()}`;
+    download.classList.remove("hidden");
+    exportStatus.textContent = `Export terminé (${(blob.size/1024/1024).toFixed(1)} Mo). Télécharge le fichier ci-dessus.`;
+  } catch (e) {
+    if (recorder && recorder.state !== "inactive") {
+      try { recorder.stop(); } catch (_) {}
+    }
+    exportStatus.textContent = "Export impossible : " + (e && e.message ? e.message : "erreur inconnue") + ".";
+  } finally {
     cancelAnimationFrame(raf);
-    exportStatus.textContent='Export impossible : '+err.message;
-  }finally{
-    if(canvasStream)canvasStream.getTracks().forEach(t=>t.stop());
-    exportButton.disabled=false;
+    if (canvasStream) canvasStream.getTracks().forEach(t => t.stop());
+    if (audioStream) audioStream.getTracks().forEach(t => t.stop());
+    exporting = false;
+    exportButton.disabled = false;
   }
 });
-wallpaperButton.addEventListener('click',()=>{
-  wallpaperStatus.textContent='Dans Photos, ouvre la Live Photo et vérifie qu’elle s’anime en maintenant le doigt dessus. Ensuite, va dans Réglages > Fond d’écran > Ajouter un fond d’écran et choisis la Live Photo si iOS la propose. Le site ne peut pas appliquer le fond d’écran automatiquement.';
-});
+})();
 </script>
 </body>
 </html>
