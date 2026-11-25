@@ -1,0 +1,73 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#090611">
+<title>VideoLock</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:25px;background:#090611;color:white;font-family:Arial,sans-serif}
+header{text-align:center;padding:25px}
+h1{font-size:34px;letter-spacing:5px;color:#b58aff}
+p{color:#aaa}
+.panel{background:#191126;border:1px solid #48306d;border-radius:20px;padding:20px;margin:20px 0}
+button,.pick{display:block;width:100%;padding:16px;background:#884bea;color:white;border:0;border-radius:13px;text-align:center;font-size:16px;font-weight:bold;margin-top:15px}
+input[type=file]{display:none}
+video{width:100%;margin-top:15px;border-radius:14px;background:#000}
+label{display:block;margin-top:20px;color:#d5baff}
+input[type=range]{width:100%;accent-color:#a66bff}
+</style>
+</head>
+<body>
+<header>
+<h1>VIDEOLOCK</h1>
+<p>Transforme tes vidéos en souvenirs</p>
+</header>
+<div class="panel">
+<h2>01 — Importer une vidéo</h2>
+<label class="pick" for="videoFile">＋ Choisir une vidéo</label>
+<input id="videoFile" type="file" accept="video/*">
+<video id="preview" controls playsinline></video>
+<p id="info">Aucune vidéo sélectionnée.</p>
+</div>
+<div class="panel">
+<h2>02 — Découper</h2>
+<label>Début : <span id="startValue">0</span> s</label>
+<input id="start" type="range" min="0" max="100" value="0">
+<label>Fin : <span id="endValue">0</span> s</label>
+<input id="end" type="range" min="0" max="100" value="100">
+<button id="prepare">Préparer mon extrait</button>
+<p id="message">Sélectionne une vidéo pour commencer.</p>
+</div>
+<script>
+const file=document.getElementById('videoFile');
+const video=document.getElementById('preview');
+let url=null;
+file.onchange=()=>{
+ const f=file.files[0];
+ if(!f)return;
+ if(url)URL.revokeObjectURL(url);
+ url=URL.createObjectURL(f);
+ video.src=url;
+ document.getElementById('info').textContent=f.name;
+};
+video.onloadedmetadata=()=>{
+ const d=video.duration;
+ start.max=d;end.max=d;
+ start.value=0;end.value=d;
+ endValue.textContent=d.toFixed(1);
+};
+start.oninput=()=>startValue.textContent=Number(start.value).toFixed(1);
+end.oninput=()=>endValue.textContent=Number(end.value).toFixed(1);
+document.getElementById('prepare').onclick=()=>{
+ if(!video.src){
+ message.textContent="Choisis d'abord une vidéo.";
+ return;
+ }
+ message.textContent="Extrait sélectionné : "+start.value+" à "+end.value+" secondes. L'export sera ajouté à la prochaine étape.";
+};
+</script>
+</body>
+</html>
