@@ -87,6 +87,30 @@ ol{padding-left:22px;line-height:1.7;color:#eee}
 </ol>
 <p class="note">Les versions récentes d’iOS peuvent limiter ou modifier les options de fond d’écran Live. La lecture animée n'est pas une vidéo en boucle permanente sur l'écran verrouillé.</p>
 </section>
+
+<section class="panel" id="livePhotoCenter">
+<h2>06 — Centre Live Photo & fond d’écran</h2>
+<p>Prépare ta Live Photo, vérifie le média et suis les étapes pour l’utiliser sur l’écran verrouillé de ton iPhone.</p>
+<label class="pick" for="liveMedia">＋ Importer une Live Photo ou une vidéo</label>
+<input id="liveMedia" type="file" accept="image/*,video/*">
+<img id="liveImagePreview" class="hidden" alt="Aperçu de la photo" style="width:100%;max-height:48vh;object-fit:contain;border-radius:14px;background:#000;margin-top:12px">
+<video id="liveVideoPreview" class="hidden" controls playsinline webkit-playsinline></video>
+<p id="liveMediaStatus" class="status" aria-live="polite">Aucun média sélectionné.</p>
+<button id="openMakeLive" type="button">Ouvrir le convertisseur MakeLive</button>
+<button id="showWallpaperSteps" class="secondary" type="button" aria-expanded="false">Afficher les étapes pour le fond d’écran</button>
+<div id="wallpaperSteps" class="hidden">
+<ol>
+<li>Si tu pars d’une vidéo, ouvre MakeLive et convertis-la en vraie Live Photo.</li>
+<li>Enregistre la Live Photo dans l’app Photos et vérifie que le badge « LIVE » apparaît.</li>
+<li>Ouvre Réglages sur l’iPhone, puis Fond d’écran → Ajouter un fond d’écran.</li>
+<li>Choisis Live Photos, sélectionne ta photo, puis vérifie que l’animation est activée si l’option est proposée.</li>
+<li>Touche Ajouter et choisis l’écran verrouillé ou la paire d’écrans si iOS le propose.</li>
+</ol>
+<p class="note">Les intitulés peuvent varier selon la version d’iOS. VideoLock dans Safari ne peut pas modifier directement le fond d’écran ni forcer iOS à accepter un fichier comme Live Photo.</p>
+</div>
+<p class="note">Important : importer ici une vidéo ou une image ne la convertit pas automatiquement en Live Photo. La création d’une vraie Live Photo nécessite une application compatible qui enregistre les éléments associés dans Photos.</p>
+</section>
+
 </main>
 
 <script>
@@ -108,6 +132,44 @@ let sourceURL = null;
 let resultURL = null;
 let duration = 0;
 let exporting = false;
+
+
+const liveMediaInput = document.getElementById("liveMedia");
+const liveImagePreview = document.getElementById("liveImagePreview");
+const liveVideoPreview = document.getElementById("liveVideoPreview");
+const liveMediaStatus = document.getElementById("liveMediaStatus");
+const showWallpaperSteps = document.getElementById("showWallpaperSteps");
+const wallpaperSteps = document.getElementById("wallpaperSteps");
+let livePreviewURL = null;
+liveMediaInput.addEventListener("change", () => {
+  const file = liveMediaInput.files && liveMediaInput.files[0];
+  if (!file) return;
+  if (livePreviewURL) URL.revokeObjectURL(livePreviewURL);
+  livePreviewURL = URL.createObjectURL(file);
+  liveImagePreview.classList.add("hidden");
+  liveVideoPreview.classList.add("hidden");
+  liveVideoPreview.pause();
+  if (file.type.startsWith("image/")) {
+    liveImagePreview.src = livePreviewURL;
+    liveImagePreview.classList.remove("hidden");
+    liveMediaStatus.textContent = `${file.name} — image chargée. Vérifie dans Photos si elle est bien marquée LIVE.`;
+  } else if (file.type.startsWith("video/")) {
+    liveVideoPreview.src = livePreviewURL;
+    liveVideoPreview.classList.remove("hidden");
+    liveMediaStatus.textContent = `${file.name} — vidéo chargée. Elle doit être convertie avec MakeLive pour devenir une vraie Live Photo.`;
+  } else {
+    liveMediaStatus.textContent = "Format non pris en charge. Choisis une image ou une vidéo.";
+  }
+});
+document.getElementById("openMakeLive").addEventListener("click", () => {
+  window.open("https://apps.apple.com/us/app/makelive-live-photo-converter/id6761287865", "_blank", "noopener,noreferrer");
+});
+showWallpaperSteps.addEventListener("click", () => {
+  const opening = wallpaperSteps.classList.contains("hidden");
+  wallpaperSteps.classList.toggle("hidden", !opening);
+  showWallpaperSteps.setAttribute("aria-expanded", String(opening));
+  showWallpaperSteps.textContent = opening ? "Masquer les étapes pour le fond d’écran" : "Afficher les étapes pour le fond d’écran";
+});
 
 const fmt = n => Number(n).toFixed(1).replace(".", ",");
 function updateLabels() {
